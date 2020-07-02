@@ -15,6 +15,7 @@ import com.zxy.tiny.common.Conditions;
 import com.zxy.tiny.common.Logger;
 import com.zxy.tiny.common.UriUtil;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -34,9 +35,24 @@ public class FileCompressor {
         if (options == null)
             options = new Tiny.FileCompressOptions();
 
-        CompressResult result = null;
-        Bitmap bitmap = shouldKeepSampling(bytes, options);
-        result = compress(bitmap, options, withBitmap, recycle);
+        CompressResult result;
+        if (bytes.length / 1024 < options.sizeLimit) { // 不满足压缩大小限制
+            result = new CompressResult();
+            if (Conditions.isDirectory(result.outfile))
+                result.outfile = FileKit.generateCompressOutfileFormatJPEG(options.compressDirectory, options.outfilePrefix).getAbsolutePath();
+            if (!Conditions.isJpegFormat(result.outfile))
+                result.outfile = FileKit.generateCompressOutfileFormatJPEG(options.compressDirectory, options.outfilePrefix).getAbsolutePath();
+            try {
+                FileKit.toFile(new ByteArrayInputStream(bytes), new File(result.outfile));
+                result.success = true;
+            } catch (IOException e) {
+                result.throwable = e;
+                e.printStackTrace();
+            }
+        } else {
+            Bitmap bitmap = shouldKeepSampling(bytes, options);
+            result = compress(bitmap, options, withBitmap, recycle);
+        }
         return result;
     }
 
@@ -57,13 +73,13 @@ public class FileCompressor {
             quality = CompressKit.DEFAULT_QUALITY;
 
         if (Conditions.isDirectory(outfile))
-            outfile = FileKit.generateCompressOutfileFormatJPEG(compressDirectory).getAbsolutePath();
+            outfile = FileKit.generateCompressOutfileFormatJPEG(compressDirectory, options.outfilePrefix).getAbsolutePath();
 
         if (!Conditions.isJpegFormat(outfile))
-            outfile = FileKit.generateCompressOutfileFormatJPEG(compressDirectory).getAbsolutePath();
+            outfile = FileKit.generateCompressOutfileFormatJPEG(compressDirectory, options.outfilePrefix).getAbsolutePath();
 
         if (bitmap.hasAlpha())
-            outfile = FileKit.generateCompressOutfileFormatPNG(compressDirectory).getAbsolutePath();
+            outfile = FileKit.generateCompressOutfileFormatPNG(compressDirectory, options.outfilePrefix).getAbsolutePath();
 
         boolean isSuccess = false;
         try {

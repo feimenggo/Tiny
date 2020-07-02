@@ -181,6 +181,16 @@ public final class Tiny {
         public float size;
 
         /**
+         * 允许压缩的最小文件大小，只有大于 sizeLimit KB的图片才会压缩
+         */
+        public int sizeLimit;
+
+        /**
+         * 文件名前缀，默认为tiny
+         */
+        public String outfilePrefix = "tiny";
+
+        /**
          * The output path of the compressed file.
          * <p>
          * By default,we will according to time to generate a outfile.

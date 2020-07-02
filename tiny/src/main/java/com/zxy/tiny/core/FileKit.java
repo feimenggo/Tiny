@@ -7,6 +7,8 @@ import com.zxy.tiny.Tiny;
 import com.zxy.tiny.common.Logger;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
@@ -30,21 +32,21 @@ public final class FileKit {
         }
     };
 
-    public static File generateCompressOutfileFormatJPEG() {
+    public static File generateCompressOutfileFormatJPEG(String prefix) {
         String suffix = getDateFormat().format(new Date(System.currentTimeMillis()));
         int seed = RANDOM.nextInt(1000);
-        return new File(getDefaultFileCompressDirectory(), "tiny-" + seed + "-" + suffix + ".jpg");
+        return new File(getDefaultFileCompressDirectory(), prefix + "-" + seed + "-" + suffix + ".jpg");
     }
 
-    public static File generateCompressOutfileFormatPNG() {
+    public static File generateCompressOutfileFormatPNG(String prefix) {
         String suffix = getDateFormat().format(new Date(System.currentTimeMillis()));
         int seed = RANDOM.nextInt(1000);
-        return new File(getDefaultFileCompressDirectory(), "tiny-" + seed + "-" + suffix + ".png");
+        return new File(getDefaultFileCompressDirectory(), prefix + "-" + seed + "-" + suffix + ".png");
     }
 
-    public static File generateCompressOutfileFormatJPEG(String directory) {
+    public static File generateCompressOutfileFormatJPEG(String directory, String prefix) {
         if (TextUtils.isEmpty(directory))
-            return generateCompressOutfileFormatJPEG();
+            return generateCompressOutfileFormatJPEG(prefix);
         String suffix = getDateFormat().format(new Date(System.currentTimeMillis()));
         int seed = RANDOM.nextInt(1000);
         File parent;
@@ -58,12 +60,12 @@ public final class FileKit {
         } catch (Exception e) {
             parent = getDefaultFileCompressDirectory();
         }
-        return new File(parent, "tiny-" + seed + "-" + suffix + ".jpg");
+        return new File(parent, prefix + "-" + seed + "-" + suffix + ".jpg");
     }
 
-    public static File generateCompressOutfileFormatPNG(String directory) {
+    public static File generateCompressOutfileFormatPNG(String directory, String prefix) {
         if (TextUtils.isEmpty(directory))
-            return generateCompressOutfileFormatPNG();
+            return generateCompressOutfileFormatPNG(prefix);
         String suffix = getDateFormat().format(new Date(System.currentTimeMillis()));
         int seed = RANDOM.nextInt(1000);
         File parent;
@@ -77,7 +79,7 @@ public final class FileKit {
         } catch (Exception e) {
             parent = getDefaultFileCompressDirectory();
         }
-        return new File(parent, "tiny-" + seed + "-" + suffix + ".png");
+        return new File(parent, prefix + "-" + seed + "-" + suffix + ".png");
     }
 
     public static File getDefaultFileCompressDirectory() {
@@ -150,5 +152,27 @@ public final class FileKit {
             }
         }
         return true;
+    }
+
+    /**
+     * 保存输入流到指定文件
+     *
+     * @param is   输入流
+     * @param file 指定文件
+     */
+    public static void toFile(InputStream is, File file) throws IOException {
+        File parentFile = file.getParentFile();
+        if (!parentFile.exists() && !parentFile.mkdirs()) {
+            throw new FileNotFoundException("File cannot create");
+        }
+        FileOutputStream fos = new FileOutputStream(file);
+        int len;
+        byte[] b = new byte[1024];
+        while ((len = is.read(b)) != -1) {
+            fos.write(b, 0, len);
+        }
+        fos.flush();
+        fos.close();
+        is.close();
     }
 }

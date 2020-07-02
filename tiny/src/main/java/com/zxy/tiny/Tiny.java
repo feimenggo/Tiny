@@ -191,6 +191,11 @@ public final class Tiny {
         public String outfilePrefix = "tiny";
 
         /**
+         * 检测长图的比例，大于这个比例就算长图，长图不会压缩
+         */
+        public Integer longRatio;
+
+        /**
          * The output path of the compressed file.
          * <p>
          * By default,we will according to time to generate a outfile.

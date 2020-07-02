@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.util.TypedValue;
 
 import com.zxy.libjpegturbo.JpegTurboCompressor;
@@ -174,7 +175,12 @@ public class FileCompressor {
         if (options == null)
             options = new Tiny.FileCompressOptions();
 
-        Bitmap result = null;
+        if (options.longRatio != null) {
+            Pair<Integer, Integer> dimensionPair = BitmapKit.decodeDimensions(bytes);
+            float longRatio = dimensionPair.first > dimensionPair.second ? dimensionPair.first / (float) dimensionPair.second : dimensionPair.second / (float) dimensionPair.first;
+            options.isKeepSampling = longRatio >= options.longRatio;
+        }
+        Bitmap result;
         if (options.isKeepSampling) {
             //TODO do you need? compress in the compression process.
             BitmapFactory.Options decodeOptions = CompressKit.getDefaultDecodeOptions();
